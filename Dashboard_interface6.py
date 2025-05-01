@@ -2,7 +2,16 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import scipy.io
-import numpy as np  # Needed for generating random uncertainty values
+import numpy as np
+import os
+import datetime
+
+def save_feedback(tab_name, message):
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    feedback_line = f"{timestamp} | {tab_name} | {message}\n"
+    
+    with open("stakeholder_feedback.txt", "a") as f:
+        f.write(feedback_line)
 
 # --- Add Reference Image ---
 # Replace 'Location.png' with the path to your image file.
@@ -55,14 +64,32 @@ data['Distance (km)'] = data['Location'].map(location_distances)
 colors = {'A': 'blueviolet', 'D': 'blue', 'F1': 'orangered', 'F2': 'gold'}
 
 tab0, tab1, tab2, tab3, tab4 = st.tabs([
+    "Testing-Dashboard", 
     "Project Overview", 
-    "Ebb Volume vs Inlet Volume", 
     "Inlet Volume vs Distance", 
     "Strategy Comparison", 
     "Uncertainty Analysis"
 ])
 
 with tab0:
+    st.header("Testig-Dashoboard")
+
+    st.markdown("""
+    This dashboard is currently in a testing phase. The goal of this version is to:
+
+    - Verify the correct functioning of the interactive components.
+    - Evaluate the clarity and usefulness of visualizations.
+    - Collect feedback from potential users on usability and data presentation.
+    - Ensure proper integration of the underlying analytical model and input data.
+
+    Please explore the tabs and functionalities, and feel free to share any suggestions for improvement.
+
+    """)
+
+# -------------------------
+# Tab 1: Proyect Overview
+# -------------------------
+with tab1:
     st.header("Project Overview: Saltwater Management in the Haringvliet Estuary")
 
     st.markdown("""
@@ -94,92 +121,13 @@ with tab0:
     - Uncertainty quantification and recommendations (Tab 4)
     """)
 
-# -------------------------
-# Tab 1: Ebb Volume vs Inlet Volume Plot (with columns)
-# -------------------------
-with tab1:
-    st.header("Ebb Volume vs Inlet Volume Overview")
-
-    col1, col2 = st.columns([1, 1.2])  # Adjust widths as needed
-
-    # Left side (col1): Reference Image & User Input
-    with col1:
-        salinity_tab1 = st.selectbox(
-            "Select Salinity Level (mg/L) for Tab 1", 
-            sorted(data['Salinity Level'].unique()), 
-            key="tab1_salinity"
-        )
-        st.image("Location.png", caption="Reference: Dashboard Explanation", use_container_width=True)
-
-    # Right side (col2): Plot
-    with col2:
-        data_tab1 = data[data['Salinity Level'] == salinity_tab1]
-        fig1, ax1 = plt.subplots(figsize=(8, 6))
-
-        for loc in data_tab1['Location'].unique():
-            loc_data = data_tab1[data_tab1['Location'] == loc]
-            ax1.scatter(
-                loc_data['Ebb Volume'], 
-                loc_data['Inlet Volume'], 
-                color=colors.get(loc, 'grey'), 
-                s=50, 
-                edgecolors='black', 
-                label=loc
-            )
-        ax1.set_title(f"Ebb Volume vs Inlet Volume\nSalinity: {salinity_tab1} mg/L")
-        ax1.set_xlabel("Ebb Volume (Mm³ per tydal cycle)")
-        ax1.set_ylabel("Inlet Volume (Mm³ per tydal cycle)")
-        ax1.grid(True)
-        ax1.legend(title="Location")
-        st.pyplot(fig1)
-
-
-# -------------------------
-# Tab 2: Inlet Volume vs Distance Plot (with columns)
-# -------------------------
-with tab2:
-    st.header("Inlet Volume vs Distance")
-
-    col1, col2 = st.columns([1, 1.2])  # Adjust widths as needed
-
-    with col1:
-        selected_salinity = st.selectbox(
-            "Select: Salinity Level (mg/L) for Tab 2",
-            sorted(data['Salinity Level'].unique()),
-            key="tab2_salinity"
-        )
-        filtered_ebb = data[data['Salinity Level'] == selected_salinity]
-        selected_ebb = st.selectbox(
-            "Select: Ebb Volume (Mm³ per tydal cycle) for Tab 2",
-            sorted(filtered_ebb['Ebb Volume'].unique()),
-            key="tab2_ebb"
-        )
-        st.image("Location.png", caption="Reference: Dashboard Explanation", use_container_width=True)
-
-    with col2:
-        subset = data[
-            (data['Salinity Level'] == selected_salinity) & 
-            (data['Ebb Volume'] == selected_ebb)
-        ]
-        fig2, ax2 = plt.subplots(figsize=(8, 6))
-
-        for loc in subset['Location'].unique():
-            loc_data = subset[subset['Location'] == loc]
-            ax2.scatter(
-                loc_data['Distance (km)'], 
-                loc_data['Inlet Volume'], 
-                color=colors.get(loc, 'grey'), 
-                s=50, 
-                edgecolors='black', 
-                label=loc
-            )
-        ax2.set_title(f"Inlet Volume vs Distance\nSalinity: {selected_salinity} mg/L, Ebb Volume: {selected_ebb} Mm³ per tydal cycle")
-        ax2.set_xlabel("Distance from floodgates (km)")
-        ax2.set_ylabel("Inlet Volume (Mm³ per tydal cycle)")
-        ax2.grid(True)
-        ax2.legend(title="Location")
-        st.pyplot(fig2)
-
+    with st.form(key="feedback"):
+        st.markdown("### 💬 Stakeholder Feedback")
+        feedback = st.text_area("All the information :", "")
+        submitted = st.form_submit_button("Submit Feedback")
+        if submitted and feedback:
+            save_feedback("Testing-Dashboard", feedback)
+            st.success("✅ Feedback submitted. Thank you!")
 # -------------------------
 # Tab 3: Strategy Comparison
 # -------------------------
