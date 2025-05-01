@@ -72,7 +72,7 @@ tab0, tab1, tab2, tab3, tab4 = st.tabs([
 ])
 
 with tab0:
-    st.header("Testig-Dashoboard")
+    st.header("Testig-Dashboard")
 
     st.markdown("""
     This dashboard is currently in a testing phase. The goal of this version is to:
