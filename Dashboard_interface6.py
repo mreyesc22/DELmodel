@@ -8,10 +8,10 @@ import datetime
 
 def save_feedback(tab_name, message):
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    feedback_line = f"{timestamp} | {tab_name} | {message}\n"
+    section_header = f"\n---\n{timestamp} | {tab_name}\n{message}\n"
     
     with open("stakeholder_feedback.txt", "a") as f:
-        f.write(feedback_line)
+        f.write(section_header)
 
 # --- Add Reference Image ---
 # Replace 'Location.png' with the path to your image file.
@@ -126,12 +126,12 @@ with tab1:
 
         q1 = st.radio("1. Do you understand the purpose of this project?", [3, 2, 1], format_func=lambda x: f"{x} - {'Yes' if x == 3 else 'Partly' if x == 2 else 'No'}")
         q2 = st.radio("2. Are the definitions of each element clear?", [3, 2, 1], format_func=lambda x: f"{x} - {'Yes' if x == 3 else 'Partly' if x == 2 else 'No'}")
-        optional_comment = st.text_area("Could you tell me the key variables of the protocol?")
-        optional_comment = st.text_area("Additional comments?")
+        key_vars_comment = st.text_area("Could you tell me the key variables of the protocol?")
+        general_comment = st.text_area("Additional comments?")
 
         submitted = st.form_submit_button("Submit Feedback")
         if submitted:
-            message = f"Q1:{q1}, Q2:{q2}, Comment:{optional_comment}, Comment:{optional_comment}"
+            message = f"Q1:{q1}, Q2:{q2}, Comment:{key_vars_comment}, Comment:{general_comment}"
             save_feedback("Project Overview", message)
             st.success("✅ Feedback submitted. Thank you!")
 
@@ -198,11 +198,11 @@ with tab2:
             [3, 2, 1],
             format_func=lambda x: f"{x} - {'Yes' if x == 3 else 'Partly' if x == 2 else 'No'}"
         )
-        q4 = st.text_area("4. Do you have any additional feedback or suggestions for this window?")
+        additional = st.text_area("4. Do you have any additional feedback or suggestions for this window?")
             
         submitted = st.form_submit_button("Submit Feedback")
         if submitted:
-            message = f"Q1:{q1}, Q2:{q2}, Q3:{q3}, Comment:{q4}"
+            message = f"Q1:{q1}, Q2:{q2}, Q3:{q3}, Comment:{additional}"
             save_feedback("Inlet Volume vs Distance", message)
             st.success("✅ Feedback submitted. Thank you!")
 
@@ -409,10 +409,10 @@ with tab4:
             [3, 2, 1],
             format_func=lambda x: f"{x} - {'Yes' if x == 3 else 'Partly' if x == 2 else 'No'}"
         )
-        q4 = st.text_area("4. Do you have any additional feedback or suggestions for this window?")
+        additional0 = st.text_area("4. Do you have any additional feedback or suggestions for this window?")
             
         submitted = st.form_submit_button("Submit Feedback")
         if submitted:
-            message = f"Q1:{q1}, Q2:{q2}, Q3:{q3}, Comment:{q4}"
+            message = f"Q1:{q1}, Q2:{q2}, Q3:{q3}, Comment:{additional0}"
             save_feedback("Inlet Volume vs Distance", message)
             st.success("✅ Feedback submitted. Thank you!")
