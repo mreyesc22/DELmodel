@@ -66,7 +66,7 @@ colors = {'A': 'blueviolet', 'D': 'blue', 'F1': 'orangered', 'F2': 'gold'}
 tab0, tab1, tab2, tab3, tab4 = st.tabs([
     "Testing-Dashboard", 
     "Project Overview", 
-    "Inlet Volume vs Distance", 
+    "Inlet Volume vs Distance from floodgates", 
     "Strategy Comparison", 
     "Uncertainty Analysis"
 ])
@@ -82,7 +82,7 @@ with tab0:
     - Collect feedback from potential users on usability and data presentation.
     - Ensure proper integration of the underlying analytical model and input data.
 
-    Please explore the tabs and functionalities, and feel free to share any suggestions for improvement.
+    Please read the scenarios, explore the tabs and functionalities, answer the questions and feel free to share any suggestions for improvement.
 
     """)
 
@@ -98,7 +98,7 @@ with tab1:
     3D simulation outputs and expert consultation.
 
     ### 📌 Objective
-    To visualize and compare dynamic equilibrium locations, flushing efficiencies, and uncertainties 
+    To visualize and compare salinity intrusion location, flushing efficiencies, and uncertainties 
     under different management strategies.
 
     ### 🔍 Key Protocol Variables:
@@ -116,23 +116,108 @@ with tab1:
     ### 📍 Model Basis
 
     Use the tabs above to explore:
-    - Location of equilibrium zones (Tab 1, 2)
-    - Strategy comparisons (Tab 3)
-    - Uncertainty quantification and recommendations (Tab 4)
+    - Dynamic equilibrium or salt intrusion location (Window 3)
+    - Strategy comparisons (Window 4)
+    - Uncertainty quantification and recommendations (Window 5)
     """)
 
-    with st.form(key="feedback"):
-        st.markdown("### 💬 Stakeholder Feedback")
-        feedback = st.text_area("All the information :", "")
+    with st.form(key="feedback_tab1"):
+        st.markdown("### 💬 Stakeholder Evaluation – Project Overview")
+
+        q1 = st.radio("1. Do you understand the purpose of this project?", [3, 2, 1], format_func=lambda x: f"{x} - {'Yes' if x == 3 else 'Partly' if x == 2 else 'No'}")
+        q2 = st.radio("2. Are the definitions of each element clear?", [3, 2, 1], format_func=lambda x: f"{x} - {'Yes' if x == 3 else 'Partly' if x == 2 else 'No'}")
+        optional_comment = st.text_area("Could you tell me the key variables of the protocol?")
+        optional_comment = st.text_area("Additional comments?")
+
         submitted = st.form_submit_button("Submit Feedback")
-        if submitted and feedback:
-            save_feedback("Testing-Dashboard", feedback)
+        if submitted:
+            message = f"Q1:{q1}, Q2:{q2}, Q3:{q3}, Comment:{optional_comment}"
+            save_feedback("Project Overview", message)
             st.success("✅ Feedback submitted. Thank you!")
+
+# -------------------------
+# Tab 2: Inlet Volume vs Distance Plot (with columns)
+# -------------------------
+with tab2:
+    
+    st.header("Inlet Volume vs Distance")
+
+    st.markdown("""
+    ### For this scenario, consider: 
+    The salinity level is **2500 mg/L** and the amount of water that is able in the river is **30 Mm³ per tydal cycle**
+    """)
+
+    col1, col2 = st.columns([1, 1.2])  # Adjust widths as needed
+
+    with col1:
+        selected_salinity = st.selectbox(
+            "Select: Salinity Level (mg/L) for Tab 2",
+            sorted(data['Salinity Level'].unique()),
+            key="tab2_salinity"
+        )
+        filtered_ebb = data[data['Salinity Level'] == selected_salinity]
+        selected_ebb = st.selectbox(
+            "Select: Ebb Volume (Mm³ per tydal cycle) for Tab 2",
+            sorted(filtered_ebb['Ebb Volume'].unique()),
+            key="tab2_ebb"
+        )
+        st.image("Location.png", caption="Reference: Dashboard Explanation", use_container_width=True)
+
+    with col2:
+        subset = data[
+            (data['Salinity Level'] == selected_salinity) & 
+            (data['Ebb Volume'] == selected_ebb)
+        ]
+        fig2, ax2 = plt.subplots(figsize=(8, 6))
+
+        for loc in subset['Location'].unique():
+            loc_data = subset[subset['Location'] == loc]
+            ax2.scatter(
+                loc_data['Distance (km)'], 
+                loc_data['Inlet Volume'], 
+                color=colors.get(loc, 'grey'), 
+                s=50, 
+                edgecolors='black', 
+                label=loc
+            )
+        ax2.set_title(f"Inlet Volume vs Distance\nSalinity: {selected_salinity} mg/L, Ebb Volume: {selected_ebb} Mm³ per tydal cycle")
+        ax2.set_xlabel("Distance from floodgates (km)")
+        ax2.set_ylabel("Inlet Volume (Mm³ per tydal cycle)")
+        ax2.grid(True)
+        ax2.legend(title="Location")
+        st.pyplot(fig2)
+
+    # Questionaries
+    with st.form(key="feedback_tab2"):  # Assuming tab index 2
+        st.markdown("### 💬 Stakeholder Evaluation – Inlet Volume vs Distance")
+
+        q1 = st.text_input("1. How many dynamic equilibrium (salt intrusion) locations are shown in the selected scenario?")
+        q2 = st.text_input("2. What is the **maximum inlet volume (Mm³)** shown for location 'A' in this scenario?")
+        q3 = st.radio(
+            "3. Is the plot of **Distance vs Inlet Volume** clear and understandable?",
+            [3, 2, 1],
+            format_func=lambda x: f"{x} - {'Yes' if x == 3 else 'Partly' if x == 2 else 'No'}"
+        )
+        q4 = st.text_area("4. Do you have any additional feedback or suggestions for this window?")
+            
+        submitted = st.form_submit_button("Submit Feedback")
+        if submitted:
+            message = f"Q1:{q1}, Q2:{q2}, Q3:{q3}, Comment:{q4}"
+            save_feedback("Inlet Volume vs Distance", message)
+            st.success("✅ Feedback submitted. Thank you!")
+
 # -------------------------
 # Tab 3: Strategy Comparison
 # -------------------------
 with tab3:
     st.header("Strategy Comparison")
+
+    st.markdown("""
+    ###  For this scenario, consider: 
+    For strategy **1**, select a salinity level of The salinity level of **1000 mg/L** and the amount of water that is able in the river is **10 Mm³ per tydal cycle.**
+                
+    For strategy **2**, select a salinity level of The salinity level of **2500 mg/L** and the amount of water that is able in the river is **10 Mm³ per tydal cycle.**
+    """)
     
     # Create two columns for two independent strategy selections
     col1, col2 = st.columns(2)
@@ -234,8 +319,27 @@ with tab3:
     else:
         st.write("No flushing efficiency data available for the selected strategies.")
 
+    # Questionaries
+    with st.form(key="feedback_tab3"):  # Assuming tab index 3
+        st.markdown("### 💬 Stakeholder Evaluation – Strategy comparation")
+
+        q1 = st.text_input("1. Which dynamic equilibrium location(s) appear for each strategy under this scenario?")
+        q2 = st.text_input("2. Now, Set **Inlet Volume = 2 Mm³** for Strategy 1 and **1 Mm³** for Strategy 2. Which strategy shows the **higher flushing efficiency** according to the plot or boxplot?")
+        q3 = st.text_area("3. Do you have any additional feedback or suggestions for improving this comparison window?")
+
+        submitted = st.form_submit_button("Submit Feedback")
+        if submitted:
+            message = f"Q1:{q1}, Q2:{q2}, Comment:{q3}"
+            save_feedback("Strategy Comparison", message)
+            st.success("✅ Feedback submitted. Thank you!")
+
 with tab4:
     st.header("Inlet Volume Uncertainty Analysis")
+
+    st.markdown("""
+    ### For this scenario, consider:  
+    The salinity level is **2500 mg/L**, the available water in the river is **80 Mm³ per tidal cycle**, and the target location is the bottom depression **"D"**.
+    """)
 
     # Column layout
     col1, col2 = st.columns([1, 2])
@@ -293,3 +397,22 @@ with tab4:
             median_unc = uncertainty_df.median()
             best_iv = median_unc.idxmin()
             st.success(f"Recommended Inlet Volume: {best_iv} Mm³ per tydal cycle (Median Uncertainty: {median_unc.min():.3f})")
+
+    # Questionaries
+    with st.form(key="feedback_tab4"):  # Assuming tab index 3
+        st.markdown("### 💬 Stakeholder Evaluation – Uncertainty Analysis")
+
+        q1 = st.text_input("1. How many dynamic equilibrium (salt intrusion) locations are shown in the selected scenario?")
+        q2 = st.text_input("2. What is the **maximum inlet volume (Mm³)** shown for location 'A' in this scenario?")
+        q3 = st.radio(
+            "3. Is the plot of **Distance vs Inlet Volume** clear and understandable?",
+            [3, 2, 1],
+            format_func=lambda x: f"{x} - {'Yes' if x == 3 else 'Partly' if x == 2 else 'No'}"
+        )
+        q4 = st.text_area("4. Do you have any additional feedback or suggestions for this window?")
+            
+        submitted = st.form_submit_button("Submit Feedback")
+        if submitted:
+            message = f"Q1:{q1}, Q2:{q2}, Q3:{q3}, Comment:{q4}"
+            save_feedback("Inlet Volume vs Distance", message)
+            st.success("✅ Feedback submitted. Thank you!")
