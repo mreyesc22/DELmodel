@@ -131,7 +131,7 @@ with tab1:
 
         submitted = st.form_submit_button("Submit Feedback")
         if submitted:
-            message = f"Q1:{q1}, Q2:{q2}, Q3:{q3}, Comment:{optional_comment}"
+            message = f"Q1:{q1}, Q2:{q2}, Comment:{optional_comment}, Comment:{optional_comment}""
             save_feedback("Project Overview", message)
             st.success("✅ Feedback submitted. Thank you!")
 
