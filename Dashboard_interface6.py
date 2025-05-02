@@ -402,17 +402,12 @@ with tab4:
     with st.form(key="feedback_tab4"):  # Assuming tab index 3
         st.markdown("### 💬 Stakeholder Evaluation – Uncertainty Analysis")
 
-        q1 = st.text_input("1. How many dynamic equilibrium (salt intrusion) locations are shown in the selected scenario?")
-        q2 = st.text_input("2. What is the **maximum inlet volume (Mm³)** shown for location 'A' in this scenario?")
-        q3 = st.radio(
-            "3. Is the plot of **Distance vs Inlet Volume** clear and understandable?",
-            [3, 2, 1],
-            format_func=lambda x: f"{x} - {'Yes' if x == 3 else 'Partly' if x == 2 else 'No'}"
-        )
-        additional0 = st.text_area("4. Do you have any additional feedback or suggestions for this window?")
-            
+        q1 = st.text_input("1. How many inlet volume options (gate openings) are shown in this scenario?", key="tab4_q1")
+        q2 = st.text_input("2. Which inlet volume option shows the **highest relative uncertainty** according to the boxplot?", key="tab4_q2")
+        q3 = st.text_area("3. What do you think about the model's **recommended inlet volume**? Do you agree with it? Why or why not?", key="tab4_q3")
+
         submitted = st.form_submit_button("Submit Feedback")
         if submitted:
-            message = f"Q1:{q1}, Q2:{q2}, Q3:{q3}, Comment:{additional0}"
-            save_feedback("Inlet Volume vs Distance", message)
+            message = f"Q1:{q1}, Q2:{q2}, Comment:{q3}"
+            save_feedback("Uncertainty Analysis", message)
             st.success("✅ Feedback submitted. Thank you!")
