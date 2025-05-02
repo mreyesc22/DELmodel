@@ -444,3 +444,8 @@ with tab4:
             }
             save_feedback("Uncertainty Analasys", message)
             st.success("✅ Feedback submitted. Thank you!")
+with st.sidebar:
+    st.markdown("### 📁 Feedback Report")
+    if os.path.exists("stakeholder_feedback.csv"):
+        with open("stakeholder_feedback.csv", "rb") as f:
+            st.download_button("📥 Download CSV", f, file_name="stakeholder_feedback.csv")
